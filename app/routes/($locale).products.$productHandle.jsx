@@ -1,6 +1,6 @@
-import {useRef, Suspense, useMemo} from 'react';
-import {Disclosure, Listbox} from '@headlessui/react';
-import {defer} from '@shopify/remix-oxygen';
+import { useRef, Suspense, useMemo } from 'react';
+import { Disclosure, Listbox } from '@headlessui/react';
+import { defer } from '@shopify/remix-oxygen';
 import {
   useLoaderData,
   Await,
@@ -8,7 +8,7 @@ import {
   useLocation,
   useNavigation,
 } from '@remix-run/react';
-import {AnalyticsPageType, Money, ShopPayButton} from '@shopify/hydrogen';
+import { AnalyticsPageType, Money, ShopPayButton } from '@shopify/hydrogen';
 import invariant from 'tiny-invariant';
 import clsx from 'clsx';
 
@@ -26,25 +26,25 @@ import {
   AddToCartButton,
   Button,
 } from '~/components';
-import {getExcerpt} from '~/lib/utils';
-import {seoPayload} from '~/lib/seo.server';
-import {MEDIA_FRAGMENT, PRODUCT_CARD_FRAGMENT} from '~/data/fragments';
-import {routeHeaders} from '~/data/cache';
+import { getExcerpt } from '~/lib/utils';
+import { seoPayload } from '~/lib/seo.server';
+import { MEDIA_FRAGMENT, PRODUCT_CARD_FRAGMENT } from '~/data/fragments';
+import { routeHeaders } from '~/data/cache';
 
 export const headers = routeHeaders;
 
-export async function loader({params, request, context}) {
-  const {productHandle} = params;
+export async function loader({ params, request, context }) {
+  const { productHandle } = params;
   invariant(productHandle, 'Missing productHandle param, check route filename');
 
   const searchParams = new URL(request.url).searchParams;
 
   const selectedOptions = [];
   searchParams.forEach((value, name) => {
-    selectedOptions.push({name, value});
+    selectedOptions.push({ name, value });
   });
 
-  const {shop, product} = await context.storefront.query(PRODUCT_QUERY, {
+  const { shop, product } = await context.storefront.query(PRODUCT_QUERY, {
     variables: {
       handle: productHandle,
       selectedOptions,
@@ -54,7 +54,7 @@ export async function loader({params, request, context}) {
   });
 
   if (!product?.id) {
-    throw new Response('product', {status: 404});
+    throw new Response('product', { status: 404 });
   }
 
   const recommended = getRecommendedProducts(context.storefront, product.id);
@@ -92,9 +92,9 @@ export async function loader({params, request, context}) {
 }
 
 export default function Product() {
-  const {product, shop, recommended} = useLoaderData();
-  const {media, title, vendor, descriptionHtml} = product;
-  const {shippingPolicy, refundPolicy} = shop;
+  const { product, shop, recommended } = useLoaderData();
+  const { media, title, vendor, descriptionHtml } = product;
+  const { shippingPolicy, refundPolicy } = shop;
 
   return (
     <>
@@ -156,10 +156,10 @@ export default function Product() {
 }
 
 export function ProductForm() {
-  const {product, analytics, storeDomain} = useLoaderData();
+  const { product, analytics, storeDomain } = useLoaderData();
 
   const [currentSearchParams] = useSearchParams();
-  const {location} = useNavigation();
+  const { location } = useNavigation();
 
   /**
    * We update `searchParams` with in-flight request data from `location` (if available)
@@ -183,7 +183,7 @@ export function ProductForm() {
   const searchParamsWithDefaults = useMemo(() => {
     const clonedParams = new URLSearchParams(searchParams);
 
-    for (const {name, value} of firstVariant.selectedOptions) {
+    for (const { name, value } of firstVariant.selectedOptions) {
       if (!searchParams.has(name)) {
         clonedParams.set(name, value);
       }
@@ -273,10 +273,16 @@ export function ProductForm() {
   );
 }
 
-function ProductOptions({options, searchParamsWithDefaults}) {
+function ProductOptions({ options, searchParamsWithDefaults }) {
   const closeRef = useRef(null);
   return (
     <>
+      <script async src="https://cdn.customily.com/customily.js"></script>
+      <script
+        async
+        src="https://cdn.customily.com/shopify/static/customily.shopify.script.unified.js"
+      ></script>
+
       {options
         .filter((option) => option.values.length > 1)
         .map((option) => (
@@ -299,7 +305,7 @@ function ProductOptions({options, searchParamsWithDefaults}) {
               {option.values.length > 7 ? (
                 <div className="relative w-full">
                   <Listbox>
-                    {({open}) => (
+                    {({ open }) => (
                       <>
                         <Listbox.Button
                           ref={closeRef}
@@ -326,7 +332,7 @@ function ProductOptions({options, searchParamsWithDefaults}) {
                               key={`option-${option.name}-${value}`}
                               value={value}
                             >
-                              {({active}) => (
+                              {({ active }) => (
                                 <ProductOptionLink
                                   optionName={option.name}
                                   optionValue={value}
@@ -343,10 +349,11 @@ function ProductOptions({options, searchParamsWithDefaults}) {
                                   {value}
                                   {searchParamsWithDefaults.get(option.name) ===
                                     value && (
-                                    <span className="ml-2">
-                                      <IconCheck />
-                                    </span>
-                                  )}
+                                      <span className="ml-2">
+                                        {' '}
+                                        <IconCheck />
+                                      </span>
+                                    )}
                                 </ProductOptionLink>
                               )}
                             </Listbox.Option>
@@ -393,7 +400,7 @@ function ProductOptionLink({
   children,
   ...props
 }) {
-  const {pathname} = useLocation();
+  const { pathname } = useLocation();
   const isLocalePathname = /\/[a-zA-Z]{2}-[a-zA-Z]{2}\//g.test(pathname);
   // fixes internalized pathname
   const path = isLocalePathname
@@ -416,10 +423,10 @@ function ProductOptionLink({
   );
 }
 
-function ProductDetail({title, content, learnMore}) {
+function ProductDetail({ title, content, learnMore }) {
   return (
     <Disclosure key={title} as="div" className="grid w-full gap-2">
-      {({open}) => (
+      {({ open }) => (
         <>
           <Disclosure.Button className="text-left">
             <div className="flex justify-between">
@@ -438,7 +445,7 @@ function ProductDetail({title, content, learnMore}) {
           <Disclosure.Panel className={'pb-4 pt-2 grid gap-2'}>
             <div
               className="prose dark:prose-invert"
-              dangerouslySetInnerHTML={{__html: content}}
+              dangerouslySetInnerHTML={{ __html: content }}
             />
             {learnMore && (
               <div className="">
@@ -569,7 +576,7 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
 
 async function getRecommendedProducts(storefront, productId) {
   const products = await storefront.query(RECOMMENDED_PRODUCTS_QUERY, {
-    variables: {productId, count: 12},
+    variables: { productId, count: 12 },
   });
 
   invariant(products, 'No data returned from Shopify API');
@@ -587,5 +594,5 @@ async function getRecommendedProducts(storefront, productId) {
 
   mergedProducts.splice(originalProduct, 1);
 
-  return {nodes: mergedProducts};
+  return { nodes: mergedProducts };
 }
